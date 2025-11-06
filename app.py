@@ -218,8 +218,8 @@ def result_page():
 
     return render_template("result.html", data=data, metrics=metrics)
 
-
-# --- Main Application Entrypoint (Render Compatible) ---
+# --- Run Flask App (Render Compatible) ---
 if __name__ == '__main__':
+    import os  # ✅ Add this line
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

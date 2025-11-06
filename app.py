@@ -33,7 +33,7 @@ FEATURE_LABELS = {
     'Age (yrs)': {'label': 'Age (years)', 'hint': 'Range: 10 - 50', 'input_type': 'number', 'min_val': 10, 'max_val': 50},
     'Weight (Kg)': {'label': 'Weight (Kg)', 'hint': 'Range: 30 - 200', 'input_type': 'number', 'min_val': 30, 'max_val': 200},
     'Height (Cm)': {'label': 'Height (Cm)', 'hint': 'Range: 100 - 220', 'input_type': 'number', 'min_val': 100, 'max_val': 220},
-    'BMI': {'label': 'Body Mass Index', 'hint': 'Range: 15 - 60 (kg/m²)', 'input_type': 'number', 'min_val': 15, 'max_val': 60, 'step': 0.1},
+    'BMI': {'label': 'Body Mass Index', 'hint': 'Range: 2 - 60 (kg/m²)', 'input_type': 'number', 'min_val': 2, 'max_val': 60, 'step': 0.1},
     'Cycle length(days)': {'label': 'Cycle Length (days)', 'hint': 'Range: 2 - 90', 'input_type': 'number', 'min_val': 15, 'max_val': 90},
     'FSH (mIU/ml)': {'label': 'FSH (mIU/mL)', 'hint': 'Enter Follicle-Stimulating Hormone level', 'input_type': 'number', 'min_val': 0, 'max_val': 100, 'step': 0.01},
     'LH (mIU/ml)': {'label': 'LH (mIU/mL)', 'hint': 'Enter Luteinizing Hormone level', 'input_type': 'number', 'min_val': 0, 'max_val': 100, 'step': 0.01},
@@ -218,8 +218,10 @@ def result_page():
 
     return render_template("result.html", data=data, metrics=metrics)
 
+
 # --- Run Flask App (Render Compatible) ---
 if __name__ == '__main__':
     import os  # ✅ Add this line
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=True)
+

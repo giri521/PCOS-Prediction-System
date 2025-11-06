@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result | PCOS Predictor</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .floating-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.7;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 20%);
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            33% {
+                transform: translateY(-20px) rotate(1deg);
+            }
+            66% {
+                transform: translateY(10px) rotate(-1deg);
+            }
+        }
+        
+        .card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        
+        .fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+        
+        .slide-up {
+            animation: slideUp 1s ease-out forwards;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .stagger-delay-1 {
+            animation-delay: 0.1s;
+        }
+        
+        .stagger-delay-2 {
+            animation-delay: 0.2s;
+        }
+        
+        .stagger-delay-3 {
+            animation-delay: 0.3s;
+        }
+        
+        .stagger-delay-4 {
+            animation-delay: 0.4s;
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+        
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float-particle 15s infinite linear;
+        }
+        
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .risk-high { 
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); 
+            border-left: 6px solid #ef4444; 
+            box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);
+        }
+        
+        .risk-moderate { 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
+            border-left: 6px solid #f59e0b; 
+            box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2);
+        }
+        
+        .risk-low { 
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); 
+            border-left: 6px solid #10b981; 
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+        }
+        
+        .result-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        .confidence-ring {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            padding: 8px;
+            background: conic-gradient(#e5e7eb 0% 100%);
+        }
+        
+        .confidence-ring-inner {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #c5c5c5;
+            border-radius: 10px;
+        }
+        
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+        
+        /* Dynamic confidence colors */
+        .confidence-high {
+            color: #10b981;
+        }
+        
+        .confidence-medium {
+            color: #f59e0b;
+        }
+        
+        .confidence-low {
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-start justify-center p-4 md:p-8">
+    <!-- Background Elements -->
+    <div class="floating-bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <!-- Main Content -->
+    <div class="w-full max-w-4xl bg-white/90 backdrop-blur-sm shadow-2xl rounded-2xl p-6 md:p-8 mt-10 relative overflow-hidden fade-in">
+        <!-- Decorative Elements -->
+        <div class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-pink-200 opacity-30"></div>
+        <div class="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-blue-200 opacity-30"></div>
+        
+        <!-- Header -->
+        <header class="text-center mb-8 relative z-10">
+            <a href="/" class="inline-flex items-center text-pink-600 hover:text-pink-800 text-sm font-medium mb-4 transition duration-300 slide-up">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to Dashboard
+            </a>
+            
+            <div class="inline-block p-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 mb-4 pulse">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+            </div>
+            
+            <h1 class="text-3xl font-bold text-gray-800 mb-1 slide-up stagger-delay-1">Prediction Result</h1>
+            <p class="text-sm text-gray-600 slide-up stagger-delay-2">Feature Set Used: <span class="font-semibold text-pink-600">{{ metrics.set_name }}</span></p>
+        </header>
+
+        <!-- Prediction Result Card (Binary Label & Confidence) -->
+        <div class="mb-8 p-8 rounded-2xl text-center shadow-2xl result-card slide-up stagger-delay-1
+                    {% if 'PCOS Detected' in data.result_text %} 
+                        border-4 border-red-500
+                    {% else %} 
+                        border-4 border-green-500
+                    {% endif %}">
+            <h2 class="text-4xl font-extrabold mb-4 
+                      {% if 'PCOS Detected' in data.result_text %} 
+                          text-red-700
+                      {% else %} 
+                          text-green-700
+                      {% endif %}">
+                {{ data.result_text }}
+            </h2>
+            
+            <div class="flex flex-col md:flex-row items-center justify-center gap-8 mt-6">
+                <div class="confidence-ring" id="confidenceRing">
+                    <div class="confidence-ring-inner">
+                        <span class="text-2xl font-bold 
+                                    {% if data.confidence | float > 80 %}
+                                        confidence-high
+                                    {% elif data.confidence | float > 60 %}
+                                        confidence-medium
+                                    {% else %}
+                                        confidence-low
+                                    {% endif %}" 
+                              id="confidenceValue">
+                            {{ data.confidence }}%
+                        </span>
+                        <span class="text-xs text-gray-500 mt-1">Confidence</span>
+                    </div>
+                </div>
+                
+                <div class="text-left">
+                    <p class="text-xl font-medium text-gray-700">Model Confidence in this Prediction</p>
+                    <p class="text-gray-600 mt-2 text-sm" id="confidenceText">
+                        {% if data.confidence | float > 80 %}
+                            High confidence prediction based on input data patterns
+                        {% elif data.confidence | float > 60 %}
+                            Moderate confidence prediction
+                        {% else %}
+                            Lower confidence - consider consulting a healthcare provider
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Risk Warning (Based on PCOS Risk Percentage) -->
+        <div class="mb-10 p-6 rounded-xl shadow-lg border-l-4 card-hover slide-up stagger-delay-2
+                    {% if data.risk_info.level == 'High Risk' %}
+                        risk-high
+                    {% elif data.risk_info.level == 'Moderate Risk / Caution' %}
+                        risk-moderate
+                    {% else %}
+                        risk-low
+                    {% endif %}">
+            <div class="flex items-start">
+                <div class="mr-4 mt-1">
+                    {% if data.risk_info.level == 'High Risk' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {% elif data.risk_info.level == 'Moderate Risk / Caution' %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    {% else %}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    {% endif %}
+                </div>
+                <div>
+                    <p class="font-bold text-xl">
+                        PCOS Risk Percentage: 
+                        <span class="ml-2 text-3xl font-extrabold
+                                    {% if data.risk_info.level == 'High Risk' %}
+                                        text-red-700
+                                    {% elif data.risk_info.level == 'Moderate Risk / Caution' %}
+                                        text-yellow-700
+                                    {% else %}
+                                        text-green-700
+                                    {% endif %}">
+                            {{ data.pcos_risk | round(2) }}%
+                        </span>
+                    </p>
+                    <p class="text-lg font-semibold mt-2">
+                        Risk Assessment: <strong>{{ data.risk_info.level }}</strong>
+                    </p>
+                    <p class="text-sm mt-3 text-gray-700">
+                        The tips below are based on this probability, not just the predicted label.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            
+            <!-- 1. Model Performance Section -->
+            <div class="lg:col-span-1 bg-white/80 p-6 rounded-xl border border-gray-200 shadow-lg card-hover slide-up stagger-delay-2">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6m4-2a2 2 0 002 2h2a2 2 0 002-2m-3-12h9m-9 3h9m-9 3h9M7 19h10a2 2 0 002-2v-6a2 2 0 00-2-2H7a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                    </svg>
+                    Model Performance
+                </h3>
+                
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-100 card-hover">
+                        <span class="font-semibold text-gray-700 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                            Accuracy Score:
+                        </span>
+                        <span class="text-xl font-extrabold text-blue-600">{{ metrics['Accuracy'] | round(1) }}%</span>
+                    </div>
+                    <div class="flex justify-between items-center p-4 bg-white rounded-lg shadow-sm border border-gray-100 card-hover">
+                        <span class="font-semibold text-gray-700 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 text-pink-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                            F1 Score:
+                        </span>
+                        <span class="text-xl font-extrabold text-pink-600">{{ metrics['F1-Score'] | round(1) }}%</span>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-200">
+                    <p class="text-xs text-gray-500 text-center">
+                        Model trained on clinical dataset with {{ metrics.set_name }} feature selection
+                    </p>
+                </div>
+            </div>
+
+            <!-- 2. Input Data Section -->
+            <div class="lg:col-span-2 bg-white/80 p-6 rounded-xl border border-gray-200 shadow-lg card-hover slide-up stagger-delay-3">
+                <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10m-4 0h4m-4 0l7-7m0 0h12a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Input Data Provided
+                </h3>
+                <ul class="space-y-3 max-h-64 overflow-y-auto pr-2 scrollbar-custom">
+                    {% for feature, value in data.inputs.items() %}
+                    <li class="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 shadow-sm card-hover">
+                        <span class="font-medium text-gray-700">{{ feature }}:</span>
+                        <span class="font-mono font-semibold text-gray-900 bg-gray-100 px-2 py-1 rounded">{{ value }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- 3. Personalized Tips Section -->
+        <div class="bg-white/80 p-6 rounded-xl border-l-4 border-pink-500 shadow-xl card-hover slide-up stagger-delay-4">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-pink-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m12.728-9.364l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Personalized Tips & Next Steps
+            </h3>
+            <ul class="space-y-4 list-none pl-0">
+                {% for tip in data.risk_info.tips %}
+                <li class="flex items-start p-4 bg-white rounded-lg border border-gray-100 shadow-sm card-hover">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 mt-0.5 text-pink-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span class="text-gray-700">{{ tip | safe }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Back Button -->
+        <div class="mt-10 text-center slide-up stagger-delay-4">
+            <a href="/" class="inline-flex items-center text-lg font-semibold text-white bg-gradient-to-r from-pink-500 to-purple-500 hover:from-pink-600 hover:to-purple-600 transition duration-300 p-4 rounded-xl shadow-lg glow transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 17l-5-5m0 0l5-5m-5 5h12" />
+                </svg>
+                Start a New Prediction
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // Create floating particles
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 15;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 20 + 5;
+                const left = Math.random() * 100;
+                const animationDuration = Math.random() * 20 + 10;
+                const animationDelay = Math.random() * 5;
+                
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${left}%`;
+                particle.style.animationDuration = `${animationDuration}s`;
+                particle.style.animationDelay = `${animationDelay}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+            
+            // Update confidence ring with dynamic gradient
+            const confidenceValue = document.getElementById('confidenceValue');
+            const confidenceRing = document.getElementById('confidenceRing');
+            
+            if (confidenceValue && confidenceRing) {
+                // Extract the numeric value from the confidence text (remove %)
+                const confidence = parseFloat(confidenceValue.textContent.replace('%', ''));
+                
+                // Set the gradient based on confidence value
+                let gradientColor;
+                if (confidence > 80) {
+                    gradientColor = '#10b981'; // Green
+                } else if (confidence > 60) {
+                    gradientColor = '#f59e0b'; // Yellow
+                } else {
+                    gradientColor = '#ef4444'; // Red
+                }
+                
+                confidenceRing.style.background = `conic-gradient(
+                    ${gradientColor} 0%,
+                    ${gradientColor} ${confidence}%,
+                    #e5e7eb ${confidence}%,
+                    #e5e7eb 100%
+                )`;
+            }
+            
+            // Add hover effects to cards
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>
